@@ -1,0 +1,45 @@
+#!/usr/bin/env node
+
+var exec = require('child_process').execSync;
+var spawn = require('child_process').spawn;
+
+var argv = require("minimist")(process.argv.slice(2), {
+  alias: {
+    'daily': 'd',
+    'publish': 'p'
+  },
+  boolean: ['daily','publish']
+});
+
+
+var isPublish = argv.publish,
+	isDaily = argv.daily,
+	commitContent = argv._[0];
+
+var utils = require('../lib/utils');
+var format = require('../lib/format');
+
+var fs = require('fs');
+
+fs.readFile("package.json", 'utf-8', function(err, data) {
+  if (err) {
+    console.log("read error");
+  } else {
+    var pkg = JSON.parse(data);
+    var _version = utils.updateVersion(pkg.version);
+    pkg.version = _version;
+    fs.writeFile("package.json", format(JSON.stringify(pkg)), function(err) {
+      if (err) console.log("write error");
+      else {
+       	process.stdout.write(exec('git checkout -b daily/' + _version));
+		process.stdout.write(exec('gulp'));
+		process.stdout.write(exec('git add --a && git commit -m ' + commitContent));
+		process.stdout.write(exec('git push origin daily/' + _version));
+		if(argv.publish){
+				process.stdout.write(exec('git tag publish/' + _version));
+				process.stdout.write(exec('git push origin publish/' + _version));
+		}
+	  }
+    });
+  }
+});

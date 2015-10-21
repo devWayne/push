@@ -1,0 +1,23 @@
+{
+	"name": "push",
+	"version": "0.1.0",
+	"description": "",
+	"main": "index.js",
+	"bin": "bin/cmd",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/devWayne/push.git"
+	},
+	"author": "Jarvan",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/devWayne/push/issues"
+	},
+	"homepage": "https://github.com/devWayne/push#readme",
+	"dependencies": {
+		"minimist": "^1.2.0"
+	}
+}
