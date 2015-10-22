@@ -1,25 +1,29 @@
 #!/usr/bin/env node
 
 var exec = require('child_process').execSync;
-var spawn = require('child_process').spawn;
+var fs = require('fs');
+var log = require('nl-clilog');
+var utils = require('../lib/utils');
+var format = require('../lib/format');
 
 var argv = require("minimist")(process.argv.slice(2), {
   alias: {
     'daily': 'd',
     'publish': 'p'
   },
-  boolean: ['daily','publish']
+  boolean: ['daily', 'publish']
 });
 
 
 var isPublish = argv.publish,
-	isDaily = argv.daily,
-	commitContent = argv._[0];
+  isDaily = argv.daily;
 
-var utils = require('../lib/utils');
-var format = require('../lib/format');
-
-var fs = require('fs');
+if (!argv._[0]) {
+  log.error('请输入commit message');
+  process.exit();
+}else{
+  var commitContent = argv._.join(' ');
+}
 
 fs.readFile("package.json", 'utf-8', function(err, data) {
   if (err) {
@@ -31,15 +35,23 @@ fs.readFile("package.json", 'utf-8', function(err, data) {
     fs.writeFile("package.json", format(JSON.stringify(pkg)), function(err) {
       if (err) console.log("write error");
       else {
-       	process.stdout.write(exec('git checkout -b daily/' + _version));
-		process.stdout.write(exec('gulp'));
-		process.stdout.write(exec('git add --a && git commit -m ' + commitContent));
-		process.stdout.write(exec('git push origin daily/' + _version));
-		if(argv.publish){
-				process.stdout.write(exec('git tag publish/' + _version));
-				process.stdout.write(exec('git push origin publish/' + _version));
-		}
-	  }
+        try {
+          log.debug('新的版本号为：' + _version);
+          process.stdout.write(exec('git checkout -b daily/' + _version));
+          log.debug('切换到分支： daily/' + _version);
+          process.stdout.write(exec('gulp'));
+          process.stdout.write(exec('git add --a && git commit -m "' + commitContent + '"'));
+          process.stdout.write(exec('git push origin daily/' + _version));
+        } catch (e) {
+		  log.error('gulp或者push失败，注意：仓库版本已经升级！');
+        }
+        if (argv.publish) {
+          process.stdout.write(exec('git tag publish/' + _version));
+		  log.debug('publish/' + _version + ' tag已经生成');
+          process.stdout.write(exec('git push origin publish/' + _version));
+        }
+      }
     });
   }
 });
+
