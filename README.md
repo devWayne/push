@@ -1,4 +1,6 @@
-# 基于Tmall的git分支策略开发的一个小工具：
+Push
+============
+> 基于Tmall的git分支策略开发的一个小工具
 
 ## 安装：
 
@@ -29,7 +31,7 @@ git push origin daily/x.y.z
 
 相当于：
 ```
-修改package.json里的版本号，升级一个小版本。
+//修改package.json里的版本号，升级一个小版本。
 git checkout -b daily/x.y.z（升级后的版本）。
 gulp
 git add --a && git commit -m 'commit message'
